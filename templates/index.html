@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lottery Predictor</title>
+</head>
+<body>
+    <h1>Lottery Predictor</h1>
+    <form id="lottery-form">
+        <label for="numbers">Enter your lottery numbers (comma-separated):</label><br><br>
+        <input type="text" id="numbers" name="numbers" required><br><br>
+        <input type="submit" value="Predict Best Month">
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('lottery-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const numbers = document.getElementById('numbers').value.split(',').map(Number);
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ winning_numbers: numbers }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = 'Best Month to Play: ' + data.predicted_numbers;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

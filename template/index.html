@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lottery Predictor</title>
+    <style>
+        #logs { font-family: monospace; white-space: pre-wrap; }
+        #numbers { width: 100%; }
+    </style>
+</head>
+<body>
+    <h1>Lottery Predictor</h1>
+    <form id="lottery-form">
+        <label for="numbers">Enter winning numbers (comma-separated, exactly 20):</label><br>
+        <input type="text" id="numbers" name="numbers" required><br><br>
+        <input type="submit" value="Predict Best Month">
+    </form>
+    <h2>Logs</h2>
+    <div id="logs"></div> 
+
+    <script>
+        function logMessage(message) {
+            const logsDiv = document.getElementById('logs');
+            logsDiv.textContent += message + '\n';
+        }
+
+        document.getElementById('lottery-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get input value and split into numbers
+            const input = document.getElementById('numbers').value;
+
+            // Ensure input only contains digits and commas, then split
+            const cleanedInput = input.replace(/[^0-9,]/g, '');
+            const numberStrings = cleanedInput.split(',');
+
+            // Parse and validate numbers (must be positive integers)
+            const numbers = numberStrings.map(numStr => parseInt(numStr.trim(), 10)).filter(num => num > 0);
+
+            if (numbers.length !== 20) {
+                logMessage("Invalid input. Please enter exactly 20 numbers.");
+                alert("Invalid input. Please enter exactly 20 numbers.");
+                return;
+            }
+            
+            logMessage(`Parsed numbers: ${numbers.join(', ')}`);
+
+            // Create the correct JSON payload
+            const payload = {
+                winning_numbers: numbers
+            };
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    logMessage(`Error: ${data.error}`);
+                    alert(`Error: ${data.error}`);
+                } else {
+                    logMessage(`Predicted best month: ${data.best_month} with probability ${data.best_month_probability.toFixed(4)}`);
+                    alert(`Predicted best month: ${data.best_month} with probability ${data.best_month_probability.toFixed(4)}`);
+                }
+            })
+            .catch(error => {
+                logMessage(`Error: ${error}`);
+                alert(`Error: ${error}`);
+            });
+        });
+    </script>
+</body>
+</html>

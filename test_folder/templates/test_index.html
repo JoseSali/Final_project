@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fetch Test</title>
+</head>
+<body>
+    <h1>Fetch Test</h1>
+
+    <button onclick="sendTestData()">Send Test Data</button>
+
+    <div id="result"></div>
+
+    <script>
+        function sendTestData() {
+            const testData = {
+                winning_numbers: [1, 2, 3, /* ... 64 numbers ... */ 62, 63, 64]
+            };
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(testData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('result').textContent = `Error: ${error.message}`;
+            });
+        }
+    </script>
+</body>
+</html>
